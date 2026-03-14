@@ -1,91 +1,88 @@
---[[ 
-    PROTECTED BY IRUIN OBFUSCATOR 
-    OPTIMIZED FOR DELTA EXECUTOR 
-]]
+local _0x4c = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local _0x50 = game:GetService("Players")
+local _0x52 = game:GetService("RunService")
+local _0x4c50 = _0x50.LocalPlayer
+local _0x4361 = workspace.CurrentCamera
 
-local _0x4c6f6164 = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-local _0x506c = game:GetService("Players")
-local _0x52756e = game:GetService("RunService")
-local _0x4c50 = _0x506c.LocalPlayer
-local _0x43616d = workspace.CurrentCamera
-
-local _0x44617461 = {
-    _0x4c31 = false, _0x4c32 = false, _0x5443 = false, 
-    _0x464f56 = 150, _0x566973 = true, _0x537064 = 16, _0x426f6e65 = "Head"
+local _0x4461 = {
+    _0x4c31 = false, _0x5443 = false, _0x464f = 150, 
+    _0x5669 = true, _0x5370 = 16, _0x426f = "Head"
 }
 
-local _0x436972 = Drawing.new("Circle")
-_0x436972.Thickness = 2
-_0x436972.Color = Color3.fromRGB(255, 255, 255)
-_0x436972.Visible = false
+-- FOV Circle with Wall-Transparency Fix
+local _0x4369 = Drawing.new("Circle")
+_0x4369.Thickness = 1
+_0x4369.Color = Color3.fromRGB(255, 255, 255)
+_0x4369.Transparency = 0.6
+_0x4369.Visible = false
 
-local _0x57696e = _0x4c6f6164:CreateWindow({
-    Name = "Iruin Hub | Delta",
-    LoadingTitle = "Decrypting Assets...",
+local _0x57 = _0x4c:CreateWindow({
+    Name = "Iruin Hub | WallCheck Active",
     ConfigurationSaving = { Enabled = false }
 })
 
-local function _0x476574(_0x6d)
-    local _0x74 = nil
-    local _0x7364 = _0x44617461._0x464f56
-    local _0x63656e = Vector2.new(_0x43616d.ViewportSize.X / 2, _0x43616d.ViewportSize.Y / 2)
+-- THE WALL CHECK LOGIC
+local function _0x5743(_0x70, _0x6d)
+    local _0x72 = RaycastParams.new()
+    _0x72.FilterDescendantsInstances = {_0x4c50.Character, _0x4361, _0x6d}
+    _0x72.FilterType = Enum.RaycastFilterType.Exclude
+    -- Casts a line to see if a wall is in between
+    local _0x727 = workspace:Raycast(_0x4361.CFrame.Position, (_0x70.Position - _0x4361.CFrame.Position), _0x72)
+    return _0x727 == nil
+end
 
-    local function _0x76616c(_0x6f)
-        if _0x6f and _0x6f:FindFirstChild("Humanoid") and _0x6f.Humanoid.Health > 0 then
-            local _0x70 = _0x6f:FindFirstChild(_0x44617461._0x426f6e65)
-            if not _0x70 then return end
-            local _0x7370, _0x6f73 = _0x43616d:WorldToViewportPoint(_0x70.Position)
-            if _0x6f73 then
-                local _0x6d = (Vector2.new(_0x7370.X, _0x7370.Y) - _0x63656e).Magnitude
-                if _0x6d < _0x7364 then
-                    _0x7364 = _0x6d
-                    _0x74 = _0x6f
+local function _0x4765()
+    local _0x74 = nil
+    local _0x73 = _0x4461._0x464f
+    local _0x63 = Vector2.new(_0x4361.ViewportSize.X / 2, _0x4361.ViewportSize.Y / 2)
+
+    for _, v in pairs(_0x50:GetPlayers()) do
+        if v ~= _0x4c50 and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+            if _0x4461._0x5443 and v.Team == _0x4c50.Team then continue end
+            
+            local _0x70 = v.Character:FindFirstChild(_0x4461._0x426f)
+            if _0x70 then
+                local _0x737, _0x6f7 = _0x4361:WorldToViewportPoint(_0x70.Position)
+                if _0x6f7 then
+                    local _0x6d2 = (Vector2.new(_0x737.X, _0x737.Y) - _0x63).Magnitude
+                    if _0x6d2 < _0x73 then
+                        -- CALLING WALL CHECK HERE
+                        if _0x5743(_0x70, v.Character) then
+                            _0x73 = _0x6d2
+                            _0x74 = v.Character
+                        end
+                    end
                 end
             end
-        end
-    end
-
-    if _0x6d == "P" then
-        for _, v in pairs(_0x506c:GetPlayers()) do
-            if v ~= _0x4c50 and v.Character then
-                if _0x44617461._0x5443 and v.Team == _0x4c50.Team then continue end
-                _0x76616c(v.Character)
-            end
-        end
-    elseif _0x6d == "N" then
-        for _, v in pairs(workspace:GetChildren()) do
-            if v:IsA("Model") and not _0x506c:GetPlayerFromCharacter(v) then _0x76616c(v) end
         end
     end
     return _0x74
 end
 
-local _0x5431 = _0x57696e:CreateTab("Players", "user")
-local _0x5432 = _0x57696e:CreateTab("NPCs", "bot")
-local _0x5433 = _0x57696e:CreateTab("Misc", "settings")
+-- TABS
+local _0x541 = _0x57:CreateTab("Players", "user")
+local _0x543 = _0x57:CreateTab("Misc", "settings")
 
-_0x5431:CreateToggle({Name = "Player Aimbot", CurrentValue = false, Callback = function(v) _0x44617461._0x4c31 = v end})
-_0x5431:CreateToggle({Name = "Team Check", CurrentValue = false, Callback = function(v) _0x44617461._0x5443 = v end})
+_0x541:CreateToggle({Name = "Aimbot + WallCheck", CurrentValue = false, Callback = function(v) _0x4461._0x4c31 = v end})
+_0x541:CreateToggle({Name = "Team Check", CurrentValue = false, Callback = function(v) _0x4461._0x5443 = v end})
+_0x541:CreateSlider({Name = "FOV Radius", Range = {10, 600}, Increment = 5, CurrentValue = 150, Callback = function(v) _0x4461._0x464f = v end})
+_0x541:CreateToggle({Name = "Show FOV", CurrentValue = true, Callback = function(v) _0x4461._0x5669 = v end})
 
-_0x5432:CreateToggle({Name = "NPC Aimbot", CurrentValue = false, Callback = function(v) _0x44617461._0x4c32 = v end})
+_0x543:CreateSlider({Name = "Speed", Range = {16, 200}, Increment = 1, CurrentValue = 16, Callback = function(v) _0x4461._0x5370 = v end})
 
-_0x5433:CreateSlider({Name = "WalkSpeed", Range = {16, 200}, Increment = 1, CurrentValue = 16, Callback = function(v) _0x44617461._0x537064 = v end})
-_0x5433:CreateSlider({Name = "FOV Radius", Range = {10, 600}, Increment = 5, CurrentValue = 150, Callback = function(v) _0x44617461._0x464f56 = v end})
-_0x5433:CreateToggle({Name = "Show FOV", CurrentValue = true, Callback = function(v) _0x44617461._0x566973 = v end})
+_0x52.RenderStepped:Connect(function()
+    _0x4369.Visible = _0x4461._0x5669
+    _0x4369.Radius = _0x4461._0x464f
+    _0x4369.Position = Vector2.new(_0x4361.ViewportSize.X / 2, _0x4361.ViewportSize.Y / 2)
 
-_0x52756e.RenderStepped:Connect(function()
-    _0x436972.Visible = _0x44617461._0x566973
-    _0x436972.Radius = _0x44617461._0x464f56
-    _0x436972.Position = Vector2.new(_0x43616d.ViewportSize.X / 2, _0x43616d.ViewportSize.Y / 2)
-
-    local _0x74 = nil
-    if _0x44617461._0x4c31 then _0x74 = _0x476574("P") elseif _0x44617461._0x4c32 then _0x74 = _0x476574("N") end
-
-    if _0x74 then
-        _0x43616d.CFrame = _0x43616d.CFrame:Lerp(CFrame.new(_0x43616d.CFrame.Position, _0x74[_0x44617461._0x426f6e65].Position), 0.3)
+    if _0x4461._0x4c31 then
+        local _0x74 = _0x4765()
+        if _0x74 then
+            _0x4361.CFrame = _0x4361.CFrame:Lerp(CFrame.new(_0x4361.CFrame.Position, _0x74[_0x4461._0x426f].Position), 0.2)
+        end
     end
     
     if _0x4c50.Character and _0x4c50.Character:FindFirstChild("Humanoid") then
-        _0x4c50.Character.Humanoid.WalkSpeed = _0x44617461._0x537064
+        _0x4c50.Character.Humanoid.WalkSpeed = _0x4461._0x5370
     end
 end)
