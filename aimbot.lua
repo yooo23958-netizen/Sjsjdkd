@@ -1,5 +1,5 @@
 --[[ 
-    IRUIN HUB | DELTA EDITION v4.3
+    IRUIN HUB | DELTA EDITION v4.4
     Aimbot | iruin hub
 ]]
 
@@ -14,7 +14,7 @@ local _0x4461 = {
     _0x464f = 150, _0x5669 = true, _0x5370 = 16, _0x426f = "Head"
 }
 
--- FOV RING PROTECTION
+-- FOV RING PROTECTION (Fixed for Delta)
 local _0x4369 = Drawing.new("Circle")
 _0x4369.Thickness = 1
 _0x4369.Color = Color3.fromRGB(255, 255, 255)
@@ -23,7 +23,7 @@ _0x4369.Filled = false
 _0x4369.Visible = false
 
 local _0x57 = _0x4c:CreateWindow({
-    Name = "Aimbot | iruin hub", -- Clean Title
+    Name = "Aimbot | iruin hub", -- Email completely removed from title
     LoadingTitle = "Iruin Hub",
     ConfigurationSaving = { Enabled = false }
 })
@@ -97,9 +97,10 @@ _0x544:CreateSlider({Name = "WalkSpeed", Range = {16, 250}, Increment = 1, Curre
 _0x544:CreateButton({Name = "Destroy GUI", Callback = function() _0x4369:Remove() _0x4c:Destroy() end})
 
 -- CREDITS TAB
-_0x545:CreateSection("Script Owner")
-_0x545:CreateLabel("yooo23958@gmail.com") -- Email moved here
-_0x545:CreateParagraph({Title = "Support", Content = "Contact the email above for bugs or suggestions."})
+_0x545:CreateSection("Creator")
+_0x545:CreateLabel("Developed by: yooo23958")
+_0x545:CreateSection("Contact")
+_0x545:CreateLabel("yooo23958@gmail.com")
 
 _0x52.RenderStepped:Connect(function()
     _0x4369.Visible = _0x4461._0x5669
