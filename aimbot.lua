@@ -1,6 +1,6 @@
 --[[ 
-    IRUIN HUB | DELTA EDITION v4.2
-    Aimbot | iruin hub | yooo23958@gmail.com
+    IRUIN HUB | DELTA EDITION v4.3
+    Aimbot | iruin hub
 ]]
 
 local _0x4c = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -23,8 +23,8 @@ _0x4369.Filled = false
 _0x4369.Visible = false
 
 local _0x57 = _0x4c:CreateWindow({
-    Name = "Aimbot | iruin hub | yooo23958@gmail.com |", -- "made by" removed
-    LoadingTitle = "Aimbot | iruin hub",
+    Name = "Aimbot | iruin hub", -- Clean Title
+    LoadingTitle = "Iruin Hub",
     ConfigurationSaving = { Enabled = false }
 })
 
@@ -98,10 +98,8 @@ _0x544:CreateButton({Name = "Destroy GUI", Callback = function() _0x4369:Remove(
 
 -- CREDITS TAB
 _0x545:CreateSection("Script Owner")
-_0x545:CreateLabel("Creator: yooo23958")
-_0x545:CreateLabel("Email: yooo23958@gmail.com")
-_0x545:CreateSection("Support")
-_0x545:CreateParagraph({Title = "Notice", Content = "Thank you for using Iruin Hub. For support, please contact via email."})
+_0x545:CreateLabel("yooo23958@gmail.com") -- Email moved here
+_0x545:CreateParagraph({Title = "Support", Content = "Contact the email above for bugs or suggestions."})
 
 _0x52.RenderStepped:Connect(function()
     _0x4369.Visible = _0x4461._0x5669
