@@ -1,185 +1,146 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+-- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
-local player = Players.LocalPlayer
-local camera = workspace.CurrentCamera
-
--- STATE MANAGEMENT
-local state = {
-    enabled = false,
-    lockValue = 100,
-    rangeValue = 1000,
-    npcFolderName = "NPCs",
-    espEnabled = false,
-    visCheck = false -- New: Only aim if NPC is visible
+-- Configuration
+local Options = {
+    Enabled = false,
+    TargetNPCs = true,
+    TargetPlayers = true,
+    FOV = 150,
+    ShowCircle = true,
+    TargetPart = "Head",
+    Smoothing = 0.4
 }
 
-local npcCache = {}
-local lastNpcRefresh = 0
-local NPC_REFRESH_INTERVAL = 1.0
-local AIM_RATE = 20 
+-- FOV Circle Visual
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Thickness = 2
+FOVCircle.Color = Color3.fromRGB(0, 255, 150)
+FOVCircle.Filled = false
+FOVCircle.Transparency = 0.7
+FOVCircle.Visible = false
 
--- HELPER: Visibility Check
-local function isVisible(targetPart)
-    if not state.visCheck then return true end
-    local char = player.Character
-    if not char then return false end
-    
-    local params = RaycastParams.new()
-    params.FilterDescendantsInstances = {char, targetPart.Parent}
-    params.FilterType = Enum.RaycastFilterType.Exclude
-    
-    local result = workspace:Raycast(camera.CFrame.Position, (targetPart.Position - camera.CFrame.Position).Unit * 500, params)
-    return result == nil -- If nil, nothing hit between camera and target
+-- Window Setup
+local Window = Rayfield:CreateWindow({
+    Name = "Iruin Hub | Universal Aimbot",
+    LoadingTitle = "Loading NPC & Player Logic...",
+    LoadingSubtitle = "by Gemini",
+    ConfigurationSaving = { Enabled = true, FolderName = "Iruin_Universal", FileName = "Config" }
+})
+
+-- Target Validation Logic
+local function isValidTarget(model)
+    if not model:FindFirstChild("Humanoid") or model.Humanoid.Health <= 0 then return false end
+    if not model:FindFirstChild(Options.TargetPart) then return false end
+    return true
 end
 
--- HELPER: Cache NPCs
-local function rebuildNpcCache()
-    local newCache = {}
-    local searchRoot = workspace:FindFirstChild(state.npcFolderName) or workspace
-    
-    for _, obj in ipairs(searchRoot:GetDescendants()) do
-        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
-            if not Players:GetPlayerFromCharacter(obj) and obj ~= player.Character then
-                table.insert(newCache, obj)
+-- Selection Logic
+local function getClosestTarget()
+    local closestTarget = nil
+    local shortestMouseDistance = Options.FOV
+    local center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
+    local function checkModel(model)
+        if isValidTarget(model) then
+            local part = model[Options.TargetPart]
+            local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+            
+            if onScreen then
+                local mouseDistance = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
+                if mouseDistance < shortestMouseDistance then
+                    shortestMouseDistance = mouseDistance
+                    closestTarget = model
+                end
             end
         end
     end
-    npcCache = newCache
+
+    -- Scan Players
+    if Options.TargetPlayers then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                checkModel(p.Character)
+            end
+        end
+    end
+
+    -- Scan NPCs (Workspace)
+    if Options.TargetNPCs then
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("Model") and not Players:GetPlayerFromCharacter(obj) then
+                checkModel(obj)
+            end
+        end
+    end
+
+    return closestTarget
 end
 
--- WINDOW SETUP
-local Window = Rayfield:CreateWindow({
-    Name = "Aimbot — NPC Edition",
-    LoadingTitle = "Initializing...",
-    LoadingSubtitle = "by Gemini",
-    ConfigurationSaving = { Enabled = true, FolderName = "NPCAimbot", FileName = "Config" }
-})
+-- Rayfield UI Tabs
+local MainTab = Window:CreateTab("Combat", 4483362458)
 
--- MAIN TAB
-local MainTab = Window:CreateTab("Aimbot", 4483362458)
+MainTab:CreateSection("Main Toggles")
 
-local Toggle = MainTab:CreateToggle({
-    Name = "Enable Aimbot",
+MainTab:CreateToggle({
+    Name = "Master Lock-On",
     CurrentValue = false,
-    Flag = "AimToggle", 
-    Callback = function(Value) state.enabled = Value end,
-})
-
-MainTab:CreateKeybind({
-    Name = "Toggle Keybind",
-    CurrentKeybind = "E",
-    Flag = "AimBind",
-    Callback = function() 
-        state.enabled = not state.enabled
-        Toggle:Set(state.enabled)
-    end,
+    Flag = "MasterToggle",
+    Callback = function(Value) Options.Enabled = Value end,
 })
 
 MainTab:CreateToggle({
-    Name = "Visibility Check",
-    CurrentValue = false,
-    Flag = "VisCheck",
-    Callback = function(Value) state.visCheck = Value end,
+    Name = "Target NPCs",
+    CurrentValue = true,
+    Flag = "NPCToggle",
+    Callback = function(Value) Options.TargetNPCs = Value end,
 })
+
+MainTab:CreateToggle({
+    Name = "Target Players",
+    CurrentValue = true,
+    Flag = "PlayerToggle",
+    Callback = function(Value) Options.TargetPlayers = Value end,
+})
+
+MainTab:CreateSection("Settings")
 
 MainTab:CreateSlider({
-    Name = "Aim Smoothness",
-    Range = {0, 100},
-    Increment = 1,
-    CurrentValue = 50,
-    Flag = "Smooth",
-    Callback = function(Value) state.lockValue = Value end,
+    Name = "FOV Radius",
+    Range = {10, 800},
+    Increment = 10,
+    Suffix = "px",
+    CurrentValue = 150,
+    Flag = "FOVRadius",
+    Callback = function(Value) Options.FOV = Value end,
 })
 
-MainTab:CreateSlider({
-    Name = "Max Range",
-    Range = {0, 2000},
-    Increment = 50,
-    CurrentValue = 1000,
-    Flag = "Range",
-    Callback = function(Value) state.rangeValue = Value end,
+MainTab:CreateToggle({
+    Name = "Show FOV Circle",
+    CurrentValue = true,
+    Callback = function(Value) Options.ShowCircle = Value end,
 })
 
--- VISUALS TAB
-local VisTab = Window:CreateTab("Visuals", 4483362458)
+-- Core Loop
+RunService.RenderStepped:Connect(function()
+    FOVCircle.Visible = Options.ShowCircle
+    FOVCircle.Radius = Options.FOV
+    FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
-VisTab:CreateToggle({
-    Name = "NPC ESP",
-    CurrentValue = false,
-    Flag = "ESPToggle",
-    Callback = function(Value) 
-        state.espEnabled = Value 
-        if not Value then
-            for _, v in ipairs(game.CoreGui:GetChildren()) do
-                if v.Name == "NPC_ESP" then v:Destroy() end
-            end
-        end
-    end,
-})
-
--- FUNCTION: Update ESP
-local function updateESP(model)
-    if not state.espEnabled then return end
-    local head = model:FindFirstChild("Head")
-    if not head or game.CoreGui:FindFirstChild(model.Name .. "_ESP") then return end
-
-    local bgui = Instance.new("BillboardGui", game.CoreGui)
-    bgui.Name = "NPC_ESP"
-    bgui.Adornee = head
-    bgui.AlwaysOnTop = true
-    bgui.Size = UDim2.new(0, 100, 0, 50)
-    bgui.StudsOffset = Vector3.new(0, 3, 0)
-
-    local tl = Instance.new("TextLabel", bgui)
-    tl.BackgroundTransparency = 1
-    tl.Size = UDim2.new(1, 0, 1, 0)
-    tl.Text = model.Name
-    tl.TextColor3 = Color3.fromRGB(255, 50, 50)
-    tl.Font = Enum.Font.GothamBold
-    tl.TextSize = 12
-
-    local high = Instance.new("Highlight", bgui)
-    high.Adornee = model
-    high.FillTransparency = 0.6
-    high.FillColor = Color3.fromRGB(255, 50, 50)
-end
-
--- MAIN LOOP
-RunService.RenderStepped:Connect(function(dt)
-    if tick() - lastNpcRefresh >= NPC_REFRESH_INTERVAL then
-        rebuildNpcCache()
-        lastNpcRefresh = tick()
-    end
-
-    local origin = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if not origin then return end
-
-    local nearest, dist = nil, state.rangeValue
-    for _, npc in ipairs(npcCache) do
-        if npc and npc.Parent and npc:FindFirstChild("HumanoidRootPart") and npc.Humanoid.Health > 0 then
+    if Options.Enabled then
+        local target = getClosestTarget()
+        if target then
+            local targetPos = target[Options.TargetPart].Position
+            local currentCF = Camera.CFrame
+            local targetCF = CFrame.new(currentCF.Position, targetPos)
             
-            -- Update ESP if enabled
-            if state.espEnabled then updateESP(npc) end
-
-            -- Find Nearest for Aimbot
-            local hrp = npc.HumanoidRootPart
-            local d = (hrp.Position - origin.Position).Magnitude
-            if d < dist and isVisible(hrp) then
-                nearest = hrp
-                dist = d
-            end
+            -- Smoothing helps prevent the "jitter" on moving NPCs
+            Camera.CFrame = currentCF:Lerp(targetCF, 1 - Options.Smoothing)
         end
-    end
-
-    if state.enabled and nearest then
-        local alpha = math.clamp(1 - (state.lockValue / 100), 0.01, 1)
-        local goal = CFrame.new(camera.CFrame.Position, nearest.Position)
-        camera.CFrame = camera.CFrame:Lerp(goal, alpha)
     end
 end)
-
-Rayfield:Notify({Title = "Gemini Aimbot", Content = "Script Loaded Successfully", Duration = 3})
