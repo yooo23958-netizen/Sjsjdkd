@@ -1,107 +1,130 @@
 --[[ 
-    IRUIN HUB - FIXED LAYOUT
-    DELTA OPTIMIZED
+    IRUIN HUB - FIXED TAB LAYOUT
+    4 TABS + WALL CHECK TOGGLE + FOV FIX
 ]]
 
-local _0x4c = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-local _0x50 = game:GetService("Players")
-local _0x52 = game:GetService("RunService")
-local _0x4c50 = _0x50.LocalPlayer
-local _0x4361 = workspace.CurrentCamera
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
-local _0x4461 = {
-    _0x4c31 = false, _0x4c32 = false, _0x5443 = false, 
-    _0x464f = 150, _0x5669 = true, _0x5370 = 16, _0x426f = "Head"
+local Config = {
+    P_Lock = false,
+    N_Lock = false,
+    WallCheck = true,  -- Wall Check Toggle State
+    TeamCheck = false,
+    FOV = 150,
+    ShowFOV = true,
+    Speed = 16,
+    Bone = "Head"
 }
 
--- FIXED FOV CIRCLE (Transparency + Thickness Fix)
-local _0x4369 = Drawing.new("Circle")
-_0x4369.Thickness = 1 -- Thin line to prevent "All White" look
-_0x4369.Color = Color3.fromRGB(255, 255, 255)
-_0x4369.Transparency = 0.5 -- Make it see-through
-_0x4369.Filled = false
-_0x4369.Visible = false
+-- FIXED FOV CIRCLE (Ring fix for Delta)
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Thickness = 1
+FOVCircle.Color = Color3.fromRGB(255, 255, 255)
+FOVCircle.Transparency = 0.4 -- 0.4 prevents the "solid white plate" bug
+FOVCircle.Filled = false
+FOVCircle.Visible = false
 
-local _0x57 = _0x4c:CreateWindow({
-    Name = "Iruin Hub | Delta",
-    LoadingTitle = "Fixing UI...",
+local Window = Rayfield:CreateWindow({
+    Name = "Iruin Hub | Delta v3",
+    LoadingTitle = "Applying Tab Fixes...",
     ConfigurationSaving = { Enabled = false }
 })
 
-local function _0x4765(_0x6d)
-    local _0x74 = nil
-    local _0x73 = _0x4461._0x464f
-    local _0x63 = Vector2.new(_0x4361.ViewportSize.X / 2, _0x4361.ViewportSize.Y / 2)
+-- WALL CHECK FUNCTION
+local function RayCheck(target, character)
+    if not Config.WallCheck then return true end -- Skip if Wall Check is OFF
+    local params = RaycastParams.new()
+    params.FilterDescendantsInstances = {LocalPlayer.Character, Camera, character}
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    local result = workspace:Raycast(Camera.CFrame.Position, (target.Position - Camera.CFrame.Position), params)
+    return result == nil
+end
 
-    local function _0x76(_0x6f)
-        if _0x6f and _0x6f:FindFirstChild("Humanoid") and _0x6f.Humanoid.Health > 0 then
-            local _0x70 = _0x6f:FindFirstChild(_0x4461._0x426f)
-            if not _0x70 then return end
-            local _0x737, _0x6f7 = _0x4361:WorldToViewportPoint(_0x70.Position)
-            if _0x6f7 then
-                local _0x6d2 = (Vector2.new(_0x737.X, _0x737.Y) - _0x63).Magnitude
-                if _0x6d2 < _0x73 then
-                    _0x73 = _0x6d2
-                    _0x74 = _0x6f
+-- TARGET LOGIC
+local function GetBest(mode)
+    local best = nil
+    local dist = Config.FOV
+    local center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
+    local function checkModel(m)
+        if m and m:FindFirstChild("Humanoid") and m.Humanoid.Health > 0 then
+            local part = m:FindFirstChild(Config.Bone)
+            if part then
+                local sPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+                if onScreen then
+                    local mDist = (Vector2.new(sPos.X, sPos.Y) - center).Magnitude
+                    if mDist < dist and RayCheck(part, m) then
+                        dist = mDist
+                        best = m
+                    end
                 end
             end
         end
     end
 
-    if _0x6d == "P" then
-        for _, v in pairs(_0x50:GetPlayers()) do
-            if v ~= _0x4c50 and v.Character then
-                if _0x4461._0x5443 and v.Team == _0x4c50.Team then continue end
-                _0x76(v.Character)
+    if mode == "P" then
+        for _, v in pairs(Players:GetPlayers()) do
+            if v ~= LocalPlayer and v.Character then
+                if Config.TeamCheck and v.Team == LocalPlayer.Team then continue end
+                checkModel(v.Character)
             end
         end
-    elseif _0x6d == "N" then
+    elseif mode == "N" then
         for _, v in pairs(workspace:GetChildren()) do
-            if v:IsA("Model") and not _0x50:GetPlayerFromCharacter(v) then _0x76(v) end
+            if v:IsA("Model") and not Players:GetPlayerFromCharacter(v) then checkModel(v) end
         end
     end
-    return _0x74
+    return best
 end
 
--- TAB REDESIGN
-local _0x541 = _0x57:CreateTab("Players", "user") -- FOV is now here
-local _0x542 = _0x57:CreateTab("NPCs", "bot")
-local _0x543 = _0x57:CreateTab("Misc", "settings")
+-- 4 TABS LAYOUT
+local Tab1 = Window:CreateTab("Player Tab", "user")
+local Tab2 = Window:CreateTab("NPC Tab", "bot")
+local Tab3 = Window:CreateTab("FOV Tab", "eye")
+local Tab4 = Window:CreateTab("Misc Tab", "settings")
 
--- PLAYER TAB (NOW INCLUDES FOV)
-_0x541:CreateSection("Aimbot")
-_0x541:CreateToggle({Name = "Player Aimbot", CurrentValue = false, Callback = function(v) _0x4461._0x4c31 = v end})
-_0x541:CreateToggle({Name = "Team Check", CurrentValue = false, Callback = function(v) _0x4461._0x5443 = v end})
+-- TAB 1: PLAYERS
+Tab1:CreateToggle({Name = "Player Aimbot", CurrentValue = false, Callback = function(v) Config.P_Lock = v end})
+Tab1:CreateToggle({Name = "Wall Check", CurrentValue = true, Callback = function(v) Config.WallCheck = v end})
+Tab1:CreateToggle({Name = "Team Check", CurrentValue = false, Callback = function(v) Config.TeamCheck = v end})
 
-_0x541:CreateSection("FOV Configuration")
-_0x541:CreateSlider({
-    Name = "FOV Radius", 
-    Range = {10, 600}, 
-    Increment = 5, 
-    CurrentValue = 150, 
-    Callback = function(v) _0x4461._0x464f = v end
+-- TAB 2: NPCs
+Tab2:CreateToggle({Name = "NPC Aimbot", CurrentValue = false, Callback = function(v) Config.N_Lock = v end})
+
+-- TAB 3: FOV CONFIG
+Tab3:CreateSlider({Name = "FOV Radius", Range = {10, 600}, Increment = 5, CurrentValue = 150, Callback = function(v) Config.FOV = v end})
+Tab3:CreateToggle({Name = "Show FOV Circle", CurrentValue = true, Callback = function(v) Config.ShowFOV = v end})
+
+-- TAB 4: MISC & DESTROY
+Tab4:CreateSlider({Name = "Speed", Range = {16, 250}, Increment = 1, CurrentValue = 16, Callback = function(v) Config.Speed = v end})
+Tab4:CreateSection("GUI Management")
+Tab4:CreateButton({
+    Name = "Destroy GUI",
+    Callback = function()
+        FOVCircle:Remove()
+        Rayfield:Destroy()
+    end,
 })
-_0x541:CreateToggle({Name = "Show FOV Circle", CurrentValue = true, Callback = function(v) _0x4461._0x5669 = v end})
 
--- NPC TAB
-_0x542:CreateToggle({Name = "NPC Aimbot", CurrentValue = false, Callback = function(v) _0x4461._0x4c32 = v end})
+-- MAIN LOOP
+RunService.RenderStepped:Connect(function()
+    FOVCircle.Visible = Config.ShowFOV
+    FOVCircle.Radius = Config.FOV
+    FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
--- MISC TAB
-_0x543:CreateSlider({Name = "WalkSpeed", Range = {16, 200}, Increment = 1, CurrentValue = 16, Callback = function(v) _0x4461._0x5370 = v end})
+    local target = nil
+    if Config.P_Lock then target = GetBest("P")
+    elseif Config.N_Lock then target = GetBest("N") end
 
-_0x52.RenderStepped:Connect(function()
-    _0x4369.Visible = _0x4461._0x5669
-    _0x4369.Radius = _0x4461._0x464f
-    _0x4369.Position = Vector2.new(_0x4361.ViewportSize.X / 2, _0x4361.ViewportSize.Y / 2)
-
-    local _0x74 = nil
-    if _0x4461._0x4c31 then _0x74 = _0x4765("P") elseif _0x4461._0x4c32 then _0x74 = _0x4765("N") end
-
-    if _0x74 then
-        _0x4361.CFrame = _0x4361.CFrame:Lerp(CFrame.new(_0x4361.CFrame.Position, _0x74[_0x4461._0x426f].Position), 0.3)
+    if target then
+        Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, target[Config.Bone].Position), 0.25)
     end
     
-    if _0x4c50.Character and _0x4c50.Character:FindFirstChild("Humanoid") then
-        _0x4c50.Character.Humanoid.WalkSpeed = _0x4461._0x5370
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = Config.Speed
     end
 end)
