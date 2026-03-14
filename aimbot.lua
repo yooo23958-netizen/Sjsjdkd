@@ -1,146 +1,99 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+--[[ 
+    IRUIN HUB - PROTECTED 
+    DELTA EXECUTOR OPTIMIZED
+]]
 
--- Services
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
+local _0x526179 = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local _0x506c = game:GetService("Players")
+local _0x52756e = game:GetService("RunService")
+local _0x4c50 = _0x506c.LocalPlayer
+local _0x43616d = workspace.CurrentCamera
 
--- Configuration
-local Options = {
-    Enabled = false,
-    TargetNPCs = true,
-    TargetPlayers = true,
-    FOV = 150,
-    ShowCircle = true,
-    TargetPart = "Head",
-    Smoothing = 0.4
+local _0x436f6e66 = {
+    _0x4c1 = false, _0x4c2 = false, _0x5443 = false, _0x5743 = true,
+    _0x464f56 = 150, _0x566973 = true, _0x537064 = 16, _0x426f6e65 = "Head"
 }
 
--- FOV Circle Visual
-local FOVCircle = Drawing.new("Circle")
-FOVCircle.Thickness = 2
-FOVCircle.Color = Color3.fromRGB(0, 255, 150)
-FOVCircle.Filled = false
-FOVCircle.Transparency = 0.7
-FOVCircle.Visible = false
+local _0x436972 = Drawing.new("Circle")
+_0x436972.Thickness = 2
+_0x436972.Color = Color3.fromRGB(255, 255, 255)
+_0x436972.Visible = false
 
--- Window Setup
-local Window = Rayfield:CreateWindow({
-    Name = "Iruin Hub | Universal Aimbot",
-    LoadingTitle = "Loading NPC & Player Logic...",
-    LoadingSubtitle = "by Gemini",
-    ConfigurationSaving = { Enabled = true, FolderName = "Iruin_Universal", FileName = "Config" }
+local _0x57696e = _0x526179:CreateWindow({
+    Name = "Iruin Hub | Delta",
+    LoadingTitle = "Decrypting...",
+    ConfigurationSaving = { Enabled = false }
 })
 
--- Target Validation Logic
-local function isValidTarget(model)
-    if not model:FindFirstChild("Humanoid") or model.Humanoid.Health <= 0 then return false end
-    if not model:FindFirstChild(Options.TargetPart) then return false end
-    return true
+local function _0x5669734368(_0x70, _0x6d)
+    local _0x7270 = RaycastParams.new()
+    _0x7270.FilterDescendantsInstances = {_0x4c50.Character, _0x43616d, _0x6d}
+    _0x7270.FilterType = Enum.RaycastFilterType.Exclude
+    return workspace:Raycast(_0x43616d.CFrame.Position, (_0x70.Position - _0x43616d.CFrame.Position), _0x7270) == nil
 end
 
--- Selection Logic
-local function getClosestTarget()
-    local closestTarget = nil
-    local shortestMouseDistance = Options.FOV
-    local center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+local function _0x47657454(_0x6d6f6465)
+    local _0x74 = nil
+    local _0x7364 = _0x436f6e66._0x464f56
+    local _0x63656e = Vector2.new(_0x43616d.ViewportSize.X / 2, _0x43616d.ViewportSize.Y / 2)
 
-    local function checkModel(model)
-        if isValidTarget(model) then
-            local part = model[Options.TargetPart]
-            local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
-            
-            if onScreen then
-                local mouseDistance = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
-                if mouseDistance < shortestMouseDistance then
-                    shortestMouseDistance = mouseDistance
-                    closestTarget = model
+    local function _0x76616c(_0x6f)
+        if _0x6f and _0x6f:FindFirstChild("Humanoid") and _0x6f.Humanoid.Health > 0 then
+            local _0x70 = _0x6f:FindFirstChild(_0x436f6e66._0x426f6e65)
+            if not _0x70 then return end
+            local _0x7370, _0x6f73 = _0x43616d:WorldToViewportPoint(_0x70.Position)
+            if _0x6f73 then
+                local _0x6d = (Vector2.new(_0x7370.X, _0x7370.Y) - _0x63656e).Magnitude
+                if _0x6d < _0x7364 then
+                    if _0x436f6e66._0x5743 and not _0x5669734368(_0x70, _0x6f) then return end
+                    _0x7364 = _0x6d
+                    _0x74 = _0x6f
                 end
             end
         end
     end
 
-    -- Scan Players
-    if Options.TargetPlayers then
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character then
-                checkModel(p.Character)
+    if _0x6d6f6465 == "P" then
+        for _, v in pairs(_0x506c:GetPlayers()) do
+            if v ~= _0x4c50 and v.Character then
+                if _0x436f6e66._0x5443 and v.Team == _0x4c50.Team then continue end
+                _0x76616c(v.Character)
             end
         end
-    end
-
-    -- Scan NPCs (Workspace)
-    if Options.TargetNPCs then
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("Model") and not Players:GetPlayerFromCharacter(obj) then
-                checkModel(obj)
-            end
+    elseif _0x6d6f6465 == "N" then
+        for _, v in pairs(workspace:GetChildren()) do
+            if v:IsA("Model") and not _0x506c:GetPlayerFromCharacter(v) then _0x76616c(v) end
         end
     end
-
-    return closestTarget
+    return _0x74
 end
 
--- Rayfield UI Tabs
-local MainTab = Window:CreateTab("Combat", 4483362458)
+local _0x5431 = _0x57696e:CreateTab("Player Tab", 4483362458)
+local _0x5432 = _0x57696e:CreateTab("NPC Tab", 4483362458)
+local _0x5433 = _0x57696e:CreateTab("ESP & Misc", 4483362458)
 
-MainTab:CreateSection("Main Toggles")
+_0x5431:CreateToggle({Name = "Player Lock", CurrentValue = false, Callback = function(v) _0x436f6e66._0x4c1 = v end})
+_0x5431:CreateToggle({Name = "Team Check", CurrentValue = false, Callback = function(v) _0x436f6e66._0x5443 = v end})
 
-MainTab:CreateToggle({
-    Name = "Master Lock-On",
-    CurrentValue = false,
-    Flag = "MasterToggle",
-    Callback = function(Value) Options.Enabled = Value end,
-})
+_0x5432:CreateToggle({Name = "NPC Lock", CurrentValue = false, Callback = function(v) _0x436f6e66._0x4c2 = v end})
 
-MainTab:CreateToggle({
-    Name = "Target NPCs",
-    CurrentValue = true,
-    Flag = "NPCToggle",
-    Callback = function(Value) Options.TargetNPCs = Value end,
-})
+_0x5433:CreateSlider({Name = "Speed", Range = {16, 200}, Increment = 1, CurrentValue = 16, Callback = function(v) _0x436f6e66._0x537064 = v end})
+_0x5433:CreateSlider({Name = "FOV Radius", Range = {10, 600}, Increment = 5, CurrentValue = 150, Callback = function(v) _0x436f6e66._0x464f56 = v end})
+_0x5433:CreateToggle({Name = "Show FOV", CurrentValue = true, Callback = function(v) _0x436f6e66._0x566973 = v end})
 
-MainTab:CreateToggle({
-    Name = "Target Players",
-    CurrentValue = true,
-    Flag = "PlayerToggle",
-    Callback = function(Value) Options.TargetPlayers = Value end,
-})
+_0x52756e.RenderStepped:Connect(function()
+    _0x436972.Visible = _0x436f6e66._0x566973
+    _0x436972.Radius = _0x436f6e66._0x464f56
+    _0x436972.Position = Vector2.new(_0x43616d.ViewportSize.X / 2, _0x43616d.ViewportSize.Y / 2)
 
-MainTab:CreateSection("Settings")
+    local _0x74 = nil
+    if _0x436f6e66._0x4c1 then _0x74 = _0x47657454("P") elseif _0x436f6e66._0x4c2 then _0x74 = _0x47657454("N") end
 
-MainTab:CreateSlider({
-    Name = "FOV Radius",
-    Range = {10, 800},
-    Increment = 10,
-    Suffix = "px",
-    CurrentValue = 150,
-    Flag = "FOVRadius",
-    Callback = function(Value) Options.FOV = Value end,
-})
-
-MainTab:CreateToggle({
-    Name = "Show FOV Circle",
-    CurrentValue = true,
-    Callback = function(Value) Options.ShowCircle = Value end,
-})
-
--- Core Loop
-RunService.RenderStepped:Connect(function()
-    FOVCircle.Visible = Options.ShowCircle
-    FOVCircle.Radius = Options.FOV
-    FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-
-    if Options.Enabled then
-        local target = getClosestTarget()
-        if target then
-            local targetPos = target[Options.TargetPart].Position
-            local currentCF = Camera.CFrame
-            local targetCF = CFrame.new(currentCF.Position, targetPos)
-            
-            -- Smoothing helps prevent the "jitter" on moving NPCs
-            Camera.CFrame = currentCF:Lerp(targetCF, 1 - Options.Smoothing)
-        end
+    if _0x74 then
+        _0x43616d.CFrame = _0x43616d.CFrame:Lerp(CFrame.new(_0x43616d.CFrame.Position, _0x74[_0x436f6e66._0x426f6e65].Position), 0.3)
+    end
+    
+    if _0x4c50.Character and _0x4c50.Character:FindFirstChild("Humanoid") then
+        _0x4c50.Character.Humanoid.WalkSpeed = _0x436f6e66._0x537064
     end
 end)
