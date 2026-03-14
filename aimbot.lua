@@ -1,6 +1,6 @@
 --[[ 
-    IRUIN HUB | DELTA EDITION v3.1
-    PROTECTED SCRIPT
+    IRUIN HUB | DELTA EDITION v4.2
+    Aimbot | iruin hub | yooo23958@gmail.com
 ]]
 
 local _0x4c = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -14,7 +14,7 @@ local _0x4461 = {
     _0x464f = 150, _0x5669 = true, _0x5370 = 16, _0x426f = "Head"
 }
 
--- FOV RING PROTECTION (Fixes Solid White Bug)
+-- FOV RING PROTECTION
 local _0x4369 = Drawing.new("Circle")
 _0x4369.Thickness = 1
 _0x4369.Color = Color3.fromRGB(255, 255, 255)
@@ -23,8 +23,8 @@ _0x4369.Filled = false
 _0x4369.Visible = false
 
 local _0x57 = _0x4c:CreateWindow({
-    Name = "Iruin Hub | Delta v3.1",
-    LoadingTitle = "Optimizing UI Layout...",
+    Name = "Aimbot | iruin hub | yooo23958@gmail.com |", -- "made by" removed
+    LoadingTitle = "Aimbot | iruin hub",
     ConfigurationSaving = { Enabled = false }
 })
 
@@ -33,7 +33,8 @@ local function _0x5243(_0x70, _0x6d)
     local _0x72 = RaycastParams.new()
     _0x72.FilterDescendantsInstances = {_0x4c50.Character, _0x4361, _0x6d}
     _0x72.FilterType = Enum.RaycastFilterType.Exclude
-    return workspace:Raycast(_0x4361.CFrame.Position, (_0x70.Position - _0x4361.CFrame.Position), _0x72) == nil
+    local result = workspace:Raycast(_0x4361.CFrame.Position, (_0x70.Position - _0x4361.CFrame.Position), _0x72)
+    return result == nil
 end
 
 local function _0x4765(_0x6d6f)
@@ -77,18 +78,30 @@ local _0x541 = _0x57:CreateTab("Player Tab", "user")
 local _0x542 = _0x57:CreateTab("NPC Tab", "bot")
 local _0x543 = _0x57:CreateTab("FOV Tab", "eye")
 local _0x544 = _0x57:CreateTab("Misc Tab", "settings")
+local _0x545 = _0x57:CreateTab("Credits", "info")
 
+-- PLAYER TAB
 _0x541:CreateToggle({Name = "Player Aimbot", CurrentValue = false, Callback = function(v) _0x4461._0x4c31 = v end})
 _0x541:CreateToggle({Name = "Wall Check", CurrentValue = true, Callback = function(v) _0x4461._0x5743 = v end})
 _0x541:CreateToggle({Name = "Team Check", CurrentValue = false, Callback = function(v) _0x4461._0x5443 = v end})
 
+-- NPC TAB
 _0x542:CreateToggle({Name = "NPC Aimbot", CurrentValue = false, Callback = function(v) _0x4461._0x4c32 = v end})
 
+-- FOV TAB
 _0x543:CreateSlider({Name = "FOV Radius", Range = {10, 600}, Increment = 5, CurrentValue = 150, Callback = function(v) _0x4461._0x464f = v end})
 _0x543:CreateToggle({Name = "Show FOV Circle", CurrentValue = true, Callback = function(v) _0x4461._0x5669 = v end})
 
+-- MISC TAB
 _0x544:CreateSlider({Name = "WalkSpeed", Range = {16, 250}, Increment = 1, CurrentValue = 16, Callback = function(v) _0x4461._0x5370 = v end})
 _0x544:CreateButton({Name = "Destroy GUI", Callback = function() _0x4369:Remove() _0x4c:Destroy() end})
+
+-- CREDITS TAB
+_0x545:CreateSection("Script Owner")
+_0x545:CreateLabel("Creator: yooo23958")
+_0x545:CreateLabel("Email: yooo23958@gmail.com")
+_0x545:CreateSection("Support")
+_0x545:CreateParagraph({Title = "Notice", Content = "Thank you for using Iruin Hub. For support, please contact via email."})
 
 _0x52.RenderStepped:Connect(function()
     _0x4369.Visible = _0x4461._0x5669
