@@ -43,7 +43,7 @@ local tabMisc = _0x57:CreateTab("Misc", "settings")
 tabAim:CreateSection("Targeting")
 tabAim:CreateToggle({Name = "Player Aimbot", CurrentValue = false, Callback = function(v) _0x4461._0x4c31 = v end})
 tabAim:CreateToggle({Name = "Wall Check", CurrentValue = true, Callback = function(v) _0x4461._0x5743 = v end})
-tabAim:CreateSlider({Name = "Snap Speed", Range = {0.1, 1}, Increment = 0.1, CurrentValue = 0.2, Callback = function(v) _0x4461._SnapSpeed = v end})
+tabAim:CreateSlider({Name = "Snap Speed 1= instant snap", Range = {0.1, 1}, Increment = 0.1, CurrentValue = 0.2, Callback = function(v) _0x4461._SnapSpeed = v end})
 tabAim:CreateDropdown({Name = "Target Bone", Options = {"Head", "UpperTorso", "HumanoidRootPart"}, CurrentOption = "Head", Callback = function(v) _0x4461._0x426f = v end})
 
 tabNpc:CreateToggle({Name = "NPC Aimbot", CurrentValue = false, Callback = function(v) _0x4461._0x4c32 = v end})
